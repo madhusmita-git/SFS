@@ -22,6 +22,7 @@ public class MyTest
     	
     	sfs = new SmartFox(true);
     	
+    	// Listener for handling extension response
         sfs.addEventListener(SFSEvent.EXTENSION_RESPONSE, new IEventListener() {
 			
 			@Override
@@ -51,18 +52,26 @@ public class MyTest
     				System.out.println("Logging in");
     				sfs.send(request);
                 }
-                else
+                else {
                     System.out.println("Connection failed");
+                }
             }
         });
         
-
+        // Listener for LOGIN, get called just after "LoginRequest"
         sfs.addEventListener(SFSEvent.LOGIN, new IEventListener() {
 			
 			@Override
 			public void dispatch(BaseEvent evt) throws SFSException {
-				//LoginRequest request = new LoginRequest("madhusmita", "", "TestZone");
 				System.out.println("Login Success :)");				
+				//System.out.println(evt.getArguments());
+				
+				Map<String, Object> mLoginOutputData = evt.getArguments();
+				System.out.println("DATA: " + mLoginOutputData.get("data"));
+				
+				ISFSObject oLoginData = (ISFSObject) mLoginOutputData.get("data");
+				System.out.println("DatabaseId: " + oLoginData.getInt("DatabaseID"));
+				System.out.println("Test param coming from login: " + oLoginData.getUtfString("test1"));
 				
 				sfs.send(new JoinRoomRequest("MyLobby"));
 				
@@ -74,6 +83,8 @@ public class MyTest
 		        sfs.send(new ExtensionRequest("math", params1));			
 			}
 		});
+        
+        // Listener for LOGIN error if any during "LoginRequest"
         sfs.addEventListener(SFSEvent.LOGIN_ERROR, new IEventListener() {
 			
 			@Override
@@ -82,6 +93,7 @@ public class MyTest
 			}
 		});
         
+        // Connect to SFS based on TCP set-up done at server
         sfs.connect("192.168.9.88", 9933);
         sfs.disconnect();
     }
