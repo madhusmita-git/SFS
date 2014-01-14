@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="lib"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="C:/Users/madhusmitap/Desktop/SFS2X_API_Java_v1.3.0(1)/SFS2X_API_Java.jar"/>
-	<classpathentry kind="lib" path="C:/Users/madhusmitap/Desktop/SFS2X_API_Java_v1.3.0(1)/sfs2x-client-core.jar"/>
-	<classpathentry kind="lib" path="C:/Users/madhusmitap/Desktop/SFS2X_API_Java_v1.3.0(1)/commons-lang-2.4.jar"/>
-	<classpathentry kind="lib" path="C:/Users/madhusmitap/Desktop/SFS2X_API_Java_v1.3.0(1)/jdom.jar"/>
-	<classpathentry kind="lib" path="C:/Users/madhusmitap/Desktop/SFS2X_API_Java_v1.3.0(1)/netty-3.2.2.Final.jar"/>
-	<classpathentry kind="lib" path="C:/Users/madhusmitap/Desktop/SFS2X_API_Java_v1.3.0(1)/slf4j-api-1.6.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/madhusmitap/Desktop/SFS2X_API_Java_v1.3.0(1)/slf4j-simple-1.6.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/SFSClientAPI"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
