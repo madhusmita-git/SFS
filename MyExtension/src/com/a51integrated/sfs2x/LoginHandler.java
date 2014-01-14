@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import com.smartfoxserver.bitswarm.sessions.ISession;
 import com.smartfoxserver.v2.core.ISFSEvent;
 import com.smartfoxserver.v2.core.SFSEventParam;
-import com.smartfoxserver.v2.entities.data.SFSArray;
 import com.smartfoxserver.v2.exceptions.SFSErrorCode;
 import com.smartfoxserver.v2.exceptions.SFSErrorData;
 import com.smartfoxserver.v2.exceptions.SFSException;
@@ -26,7 +25,16 @@ public class LoginHandler extends BaseServerEventHandler{
 
         ISession session = (ISession)event.getParameter(SFSEventParam.SESSION);
 
+        //make sure there is a password before you try to use the checkSecurePassword function
+        if (password.equals(""))
+        {
+            SFSErrorData data = new SFSErrorData(SFSErrorCode.LOGIN_BAD_PASSWORD);
+            data.addParameter(username);
+            throw new SFSLoginException("You must enter a password.", data);
+        }        
+        
         try {
+        	
             //get a connection to the database
             Connection conn = getParentExtension().getParentZone().getDBManager().getConnection();
 
@@ -39,39 +47,28 @@ public class LoginHandler extends BaseServerEventHandler{
             // Obtain ResultSet
             ResultSet result = sql.executeQuery();
 
-            //Put the result into an SFSobject array
-            SFSArray row = SFSArray.newFromResultSet(result);
-
-            //make sure there is a password before you try to use the checkSecurePassword function
-            if (password.equals(""))
+            if(! result.first())
             {
-                SFSErrorData data = new SFSErrorData(SFSErrorCode.LOGIN_BAD_PASSWORD);
-                data.addParameter(username);
-                throw new SFSLoginException("You must enter a password.", data);
+                SFSErrorData errData = new SFSErrorData(SFSErrorCode.LOGIN_BAD_USERNAME);
+                errData.addParameter(username);
+
+                throw new SFSLoginException("Bad user name: "+ username, errData);
             }
+
+            int dbId = result.getInt("user_id");
+            
+            session.setProperty("DatabaseID", dbId);
 
            //SFS always encrypts passwords before sending them so you need to decrypt the password
            //received from the database and compare that to what they entered in flash
-           /*if (!getApi().checkSecurePassword(session, row.getSFSObject(0).getUtfString("password"), password))
+           if (! getApi().checkSecurePassword(session, result.getString("pwd"), password))
            {
                 SFSErrorData data = new SFSErrorData(SFSErrorCode.LOGIN_BAD_PASSWORD);
 
                 data.addParameter(username);
 
                 throw new SFSLoginException("Login failed for user: "  + username, data);
-            }*/
-
-            //this was in one of the SFS examples so I left it in there for testing purposes
-            if (username.equals("Gonzo") || username.equals("Kermit"))
-            {
-
-                // Create the error code to send to the client
-                SFSErrorData errData = new SFSErrorData(SFSErrorCode.LOGIN_BAD_USERNAME);
-                errData.addParameter(username);
-
-                // Fire a Login exception
-                throw new SFSLoginException("Gonzo and Kermit are not allowed in this Zone!", errData);
-            }
+           }
 
             //make sure you close the database connection when you're done with it, especially if you've
             //set a low number of maximum connections
@@ -80,7 +77,6 @@ public class LoginHandler extends BaseServerEventHandler{
             //at this point you could trigger an joinRoom request if you wanted to, otherwise
             //this will return success to your LOGIN event listener
             trace("Login successful, joining room!");
-
         } catch (SQLException e) {
             trace(ExtensionLogLevel.WARN, " SQL Failed: " + e.toString());
         }
