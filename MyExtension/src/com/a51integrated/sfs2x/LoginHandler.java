@@ -7,7 +7,9 @@ import java.sql.SQLException;
 
 import com.smartfoxserver.bitswarm.sessions.ISession;
 import com.smartfoxserver.v2.core.ISFSEvent;
+import com.smartfoxserver.v2.core.SFSConstants;
 import com.smartfoxserver.v2.core.SFSEventParam;
+import com.smartfoxserver.v2.entities.data.ISFSObject;
 import com.smartfoxserver.v2.exceptions.SFSErrorCode;
 import com.smartfoxserver.v2.exceptions.SFSErrorData;
 import com.smartfoxserver.v2.exceptions.SFSException;
@@ -24,7 +26,10 @@ public class LoginHandler extends BaseServerEventHandler{
         String password = (String) event.getParameter(SFSEventParam.LOGIN_PASSWORD);
 
         ISession session = (ISession)event.getParameter(SFSEventParam.SESSION);
-
+        
+        // Handle output data from LOGIN
+        ISFSObject outData = (ISFSObject) event.getParameter(SFSEventParam.LOGIN_OUT_DATA);
+        
         //make sure there is a password before you try to use the checkSecurePassword function
         if (password.equals(""))
         {
@@ -57,6 +62,13 @@ public class LoginHandler extends BaseServerEventHandler{
 
             int dbId = result.getInt("user_id");
             
+            // Provide a new name for the user:
+            String newName = "User-" + dbId + "-" + username;
+            outData.putUtfString(SFSConstants.NEW_LOGIN_NAME, newName);
+            
+            // Append some additional return values
+            outData.putUtfString("test1", "test");
+            outData.putInt("DatabaseID", dbId);
             session.setProperty("DatabaseID", dbId);
 
            //SFS always encrypts passwords before sending them so you need to decrypt the password
