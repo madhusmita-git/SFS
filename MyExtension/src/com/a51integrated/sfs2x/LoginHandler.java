@@ -37,20 +37,22 @@ public class LoginHandler extends BaseServerEventHandler{
             data.addParameter(username);
             throw new SFSLoginException("You must enter a password.", data);
         }        
-        
+        Connection conn = null;
+        PreparedStatement sql = null;
+        ResultSet result = null;
         try {
         	
             //get a connection to the database
-            Connection conn = getParentExtension().getParentZone().getDBManager().getConnection();
+            conn = getParentExtension().getParentZone().getDBManager().getConnection();
 
             //This will strip potential SQL injections
-            PreparedStatement sql = conn.prepareStatement("SELECT user_id, pwd FROM users WHERE name = ?");
+            sql = conn.prepareStatement("SELECT user_id, pwd FROM users WHERE name = ?");
             sql.setString(1, username);
 
             trace("LOGIN EXTENSION SQL: " + sql);
             
             // Obtain ResultSet
-            ResultSet result = sql.executeQuery();
+            result = sql.executeQuery();
 
             if(! result.first())
             {
@@ -91,7 +93,31 @@ public class LoginHandler extends BaseServerEventHandler{
             trace("Login successful, joining room!");
         } catch (SQLException e) {
             trace(ExtensionLogLevel.WARN, " SQL Failed: " + e.toString());
-        }
+        } finally {
+        	try {
+        		if (result!=null)
+				result.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	
+        	try {
+        		if (sql!=null)
+				sql.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	
+        	try {
+        		if (conn!=null)
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}        	
+		}
 	}
 
 }
